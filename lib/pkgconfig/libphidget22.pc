@@ -1,0 +1,10 @@
+prefix=/home/johnche/Projects/TMR4160/include
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: libphidget22
+Description: Phidgets library
+Version: 1.0.0
+Libs: -L${libdir} -lphidget22
+Cflags: -I${includedir}

@@ -1,11 +1,8 @@
-CC = clang
-CFLAGS = -isystem ./include
-LDFLAGS = -Llib -rpath '$$ORIGIN/lib'
-LDFLAGS += -lphidget22
-
-all: clean build
-
-build: dynpos
+all:
+	cd src; make
 
 clean:
-	rm -f *.o
+	cd src; make clean
+
+rebuild:
+	clean all
