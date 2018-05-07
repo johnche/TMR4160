@@ -18,13 +18,14 @@
 
 double fRand(double f_min, double f_max) {
     double f = (double) rand() / RAND_MAX;
-    return f_min + f*(f_max - f_min);
+    return f*(f_max - f_min);
 }
 
 double scaleValue(double scale_min, double scale_max, double value_max, double value) {
     double percentage = value / value_max;
-    return scale_min + percentage*(scale_max - scale_min);
+    return percentage*(scale_max - scale_min);
 }
+
 
 int SCREEN_WIDTH = 1280;
 int SCREEN_HEIGHT = 800;
@@ -53,23 +54,31 @@ void renderLLData() {
     double counter = 0;
     glBegin(GL_LINES);
     glLineWidth(1.0);
-    while (current[0]->next != NULL) {
-        //glColor3f(1, 0, 0);
+    while (current[0]->next != NULL && current[1]->next != NULL && current[2]->next != NULL) {
+        // Sum graph
         glColor3ub(71, 144, 48);
-        glVertex3f(x_left + 0.1 + counter-step, current[0]->data, 0);
-        glVertex3f(x_left + 0.1 + counter, current[0]->next->data, 0);
+        double pid_sum = current[0]->data + current[1]->data + current[2]->data;
+        double next_pid_sum = current[0]->next->data + current[1]->next->data + current[2]->next->data;
+        printf("pid_sum %f, next_pid_sum %f\n", pid_sum, next_pid_sum);
+        glVertex3f(x_left + 0.1 + counter-step, sum_bottom + pid_sum/3.0f, 0);
+        glVertex3f(x_left + 0.1 + counter, sum_bottom + next_pid_sum/3.0f, 0);
+
+        // Kp graph
+        glColor3ub(71, 144, 48);
+        glVertex3f(x_left + 0.1 + counter-step, kp_bottom + current[0]->data, 0);
+        glVertex3f(x_left + 0.1 + counter, kp_bottom + current[0]->next->data, 0);
         current[0] = current[0]->next;
 
-        //glColor3f(0, 1, 0);
+        // Ki graph
         glColor3ub(37, 87, 107);
-        glVertex3f(x_left + 0.1 + counter-step, current[1]->data, 0);
-        glVertex3f(x_left + 0.1 + counter, current[1]->next->data, 0);
+        glVertex3f(x_left + 0.1 + counter-step, ki_bottom + current[1]->data, 0);
+        glVertex3f(x_left + 0.1 + counter, ki_bottom + current[1]->next->data, 0);
         current[1] = current[1]->next;
 
-        //glColor3f(0, 0, 1);
+        // Kd graph
         glColor3ub(162, 54, 69);
-        glVertex3f(x_left + 0.1 + counter-step, current[2]->data, 0);
-        glVertex3f(x_left + 0.1 + counter, current[2]->next->data, 0);
+        glVertex3f(x_left + 0.1 + counter-step, kd_bottom + current[2]->data, 0);
+        glVertex3f(x_left + 0.1 + counter, kd_bottom + current[2]->next->data, 0);
         current[2] = current[2]->next;
 
         if (counter > g_width - 2*step) {
@@ -81,16 +90,14 @@ void renderLLData() {
             counter += step;
     }
     glEnd();
-    printf("counter %f\n", counter);
 
 }
 
-void rng() {
+void rng() { // ONLY FOR TESTING
     addLLNode(kp_data, fRand(kp_bottom, kp_bottom + g_height));
     addLLNode(ki_data, fRand(ki_bottom, ki_bottom + g_height));
     addLLNode(kd_data, fRand(kd_bottom, kd_bottom + g_height));
     printf("kp %f, ki %f, kd %f\n", kp_data->tail->data, ki_data->tail->data, kd_data->tail->data);
-    usleep(50000);
 }
 
 void addPIDNode(double Kp, double Ki, double Kd) {
