@@ -6,7 +6,9 @@
 #include "phidget_tools.h"
 #include "servo.h"
 #include "voltage_input.h"
-#include "glplot.h"
+#include "pid_visuals.h"
+//#include "glplot.h"
+//#include "controllers.h"
 #ifndef _WIN32
 #include <unistd.h>
 #else
@@ -46,7 +48,7 @@ double sampler(double start_value, double constant,
     return new_value;
 }
 
-double scale_motor_output(double value, struct MotorSettings settings) {
+double scaleOutput(double value, struct MotorSettings settings) {
     if (value > 100) {
         return settings.motor_max;
     } else if (value < 0) {
@@ -56,29 +58,23 @@ double scale_motor_output(double value, struct MotorSettings settings) {
     }
 }
 
-double PID_controller(double Kp, double Ki, double Kd, double dt,
+void PID_controller(double Kp, double Ki, double Kd, double dt,
         double reference, struct DPContext context) {
-    double i_prev;
-    double error; double error_prev;
-    double up; double ui; double ud; double output;
+    double i_prev = 0;
+    double error;
+    double error_prev;
+    double up;
+    double ui;
+    double ud;
+    double output;
 
     double boat_position;
     PhidgetVoltageInput_getSensorValue(&context.vch, &boat_position);
 
-    printf("boat position: %lf\n", boat_position);
-
     struct MotorSettings motor_settings;
-    motor_settings.motor_min = 62.1;
-    motor_settings.motor_max = 64.8;
-    int sock = get_socket("0.0.0.0", "5002");
-    char* message;
+    motor_settings.motor_min = 82.0;
+    motor_settings.motor_max = 140.0;
 
-    //PhidgetRCServo_setTargetPosition(context.ch, 0);
-    //sleep(5);
-    //PhidgetRCServo_setTargetPosition(context.ch, 90);
-    //sleep(5);
-    //PhidgetRCServo_setTargetPosition(context.ch, 180);
-    //sleep(5);
     while (true) {
         boat_position = sampler(boat_position, 0.85, 20, dt, &context.vch);
         //printf("PID %lf\n", boat_position);
@@ -90,15 +86,30 @@ double PID_controller(double Kp, double Ki, double Kd, double dt,
         error_prev = error;
         i_prev = ui;
 
-        //printf("%lf %lf %lf %lf\n", up, ui, ud, Kp);
-        output = scale_motor_output(Kp*(up + ui + ud)*-1, motor_settings);
-        printf("output: %lf, position: %lf\n", output, boat_position);
-        asprintf(&message, "%lf %lf %lf %lf %lf\n",  up, ui, ud, Kp, output);
-        writedata(sock, message, strlen(message));
+        printf("%lf %lf %lf %lf\n", up, ui, ud, Kp);
+        addPIDNode(up, ui, ud);
+        output = scaleOutput(Kp*(up + ui + ud)*-1, motor_settings);
+        //printf("output: %lf, position: %lf\n", output, boat_position);
         PhidgetRCServo_setTargetPosition(context.ch, output);
     }
-    return 0.0;
 }
+
+//void setMotorOutput(struct DPContext ctx, double output) {
+//    double scaled_output = scaleOutput(output, motor_settings);
+//    PhidgetRCServo_setTargetPosition(ctx.ch, scaled_output);
+//}
+//double reference;
+//void motorController(double Kp, double Ki, double Kd, double dt, struct DPContext ctx) {
+//    double boat_position;
+//    double output;
+//    PhidgetVoltageInput_getSensorValue(&ctx.vch, &boat_position);
+//
+//    while (true) {
+//        boat_position = sampler(boat_position, 0.85, 20, dt, &ctx.vch);
+//        output = calculatePIDOutput(Kp, Ki, Kd, reference - boat_position, dt);
+//        setMotorOutput(ctx, output);
+//    }
+//}
 
 void test_motor(PhidgetRCServoHandle* ch) {
     double test_input;
@@ -122,7 +133,8 @@ int main(int argc, char** argv) {
  //   double dt = atoi(argv[5]);
  //   printf("Kp: %lf, Ki: %lf, Kd: %lf, reference: %lf, dt: %d\n", Kp, Ki, Kd, reference, dt);
 
-    openGLinit(&argc, argv);
+    printf("start\n");
+    graphInit(&argc, argv);
 
 //    PhidgetLog_enable(PHIDGET_LOG_INFO, NULL);
 //    struct DPContext context;
