@@ -29,6 +29,8 @@ double scaleValue(double scale_min, double scale_max, double value_max, double v
 
 int SCREEN_WIDTH = 1280;
 int SCREEN_HEIGHT = 800;
+double boatline = 10.7;
+double boatline_thickness = 0.4;
 double sum_bottom = 7.6;
 double kp_bottom = 5.1;
 double ki_bottom = 2.6;
@@ -39,7 +41,11 @@ double x_left = 0.1;
 double kp_r;
 double ki_r;
 double kd_r;
+double kp_max = 0;
+double ki_max = 0;
+double kd_max = 0;
 double sum_r;
+double boat_position;
 LinkedList* kp_data;
 LinkedList* ki_data;
 LinkedList* kd_data;
@@ -100,15 +106,44 @@ void rng() { // ONLY FOR TESTING
     printf("kp %f, ki %f, kd %f\n", kp_data->tail->data, ki_data->tail->data, kd_data->tail->data);
 }
 
-void addPIDNode(double Kp, double Ki, double Kd) {
-    addLLNode(kp_data, scaleValue(kp_bottom, kp_bottom + g_height, 200, Kp));
-    addLLNode(ki_data, scaleValue(ki_bottom, ki_bottom + g_height, 200, Ki));
-    addLLNode(kd_data, scaleValue(kd_bottom, kd_bottom + g_height, 200, Kd));
+void addPIDNode(double up, double ui, double ud) {
+    if (up > kp_max)
+        kp_max = up;
+    if (ui > ki_max)
+        ki_max = ui;
+    if (ud > kd_max)
+        kd_max = ud;
+
+    double scaled_up = scaleValue(kp_bottom, kp_bottom + g_height, kp_max, up);
+    double scaled_ui = scaleValue(ki_bottom, ki_bottom + g_height, ki_max, ui);
+    double scaled_ud = scaleValue(kd_bottom, kd_bottom + g_height, kd_max, ud);
+    if (scaled_up > kp_bottom + g_height)
+        scaled_up = kp_bottom + g_height;
+    if (scaled_ui > ki_bottom + g_height)
+        scaled_ui = ki_bottom + g_height;
+    if (scaled_ud > kd_bottom + g_height)
+        scaled_ud = kd_bottom + g_height;
+    addLLNode(kp_data, scaled_up);
+    addLLNode(ki_data, scaled_ui);
+    addLLNode(kd_data, scaled_ud);
+}
+
+void setBoatPosition(double position, double min_val, double max_val) {
+    boat_position = x_left + scaleValue(x_left, x_left + g_width, max_val - min_val, position - min_val);
+    //printf("boat pos %f\n", boat_position);
+}
+
+void drawBoat() {
+    glColor3f(0, 0, 0);
+    glRectf(boat_position - 0.05, boatline - 0.5, boat_position + 0.05, boatline + boatline_thickness + 0.4);
 }
 
 void drawLayout() {
-    glRectf(0.1, 10.5, 15, 11.0);
+    // Boat position rectangle
+    glColor3ub(7, 102, 120);
+    glRectf(x_left, boatline, x_left + g_width, boatline + boatline_thickness);
 
+    // Rectangles for the four graphs
     glColor3ub(251, 241, 199);
     glRectf(x_left, sum_bottom, x_left + g_width, sum_bottom + g_height);
     glRectf(x_left, kp_bottom, x_left + g_width, kp_bottom + g_height);
@@ -117,15 +152,19 @@ void drawLayout() {
 
     glBegin(GL_LINES);
     glColor3f(1, 0, 0);
+    // Axis line for PID output
     glVertex3f(x_left, sum_r, 0);
     glVertex3f(x_left + g_width, sum_r, 0);
 
+    // Axis line for the proportional term
     glVertex3f(x_left, kp_r, 0);
     glVertex3f(x_left + g_width, kp_r, 0);
 
+    // Axis line for the integral term
     glVertex3f(x_left, ki_r, 0);
     glVertex3f(x_left + g_width, ki_r, 0);
 
+    // Axis line for the derivative term
     glVertex3f(x_left, kd_r, 0);
     glVertex3f(x_left + g_width, kd_r, 0);
     glEnd();
@@ -194,6 +233,7 @@ int openGLinit(int* argc, char** argv) {
     ki_r = (2*ki_bottom + g_height)/2;
     kd_r = (2*kd_bottom + g_height)/2;
     sum_r = (2*sum_bottom + g_height)/2;
+    boat_position = 0;
 
     glutInit(argc, argv);
     glutInitDisplayMode(GLUT_SINGLE);
@@ -218,3 +258,4 @@ int openGLinit(int* argc, char** argv) {
     }
     return 0;
 }
+
