@@ -23,28 +23,22 @@ struct MotorSettings {
     double motor_min;
 };
 
-double PID_withPrev(double error0, double error1, double error2,
-        double Kp, double Ti, double Td, double dt, double uprev) {
-    double up = error0 - error1;
-    double ui = (error0 * dt)/Ti;
-    double ud = (Td/dt)*(error0 - 2*error1 + error2);
-    return Kp*(up + ui + ud) + uprev;
-}
-
 double sampler(double start_value, double constant,
         int pid_frequency, int dt, PhidgetVoltageInputHandle* vch) {
+
     double new_value; double old_value; double res;
     double test1; double test2;
     for (int i = 0; i < pid_frequency; i++) {
         old_value = start_value;
         PhidgetVoltageInput_getSensorValue(*vch, &new_value);
+        setBoatPosition(new_value, 3.55, 5);
         //new_value = old_value*constant + new_value*(1 - constant);
         //res = old_value*constant + new_value*(1 - constant);
         test1 = old_value*constant;
         test2 = new_value*(1-constant);
         res = test1 + test2;
-        printf("test1 %lf test2 %lf\n", test1, test2);
-        printf("polled %lf  smoothed(res) %lf\n", new_value, res);
+        //printf("test1 %lf test2 %lf\n", test1, test2);
+        //printf("polled %lf  smoothed(res) %lf\n", new_value, res);
         new_value = res;
         usleep(1000*dt);
     }
