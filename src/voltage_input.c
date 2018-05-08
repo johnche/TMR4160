@@ -6,7 +6,7 @@ static void onVoltageChangeHandler(PhidgetVoltageInputHandle ch, void *ctx, doub
 	//printf("Voltage Changed: %.4f\n", voltage);
 }
 
-PhidgetVoltageInputHandle* voltageInit() {
+PhidgetVoltageInputHandle* voltageInit(int channel) {
 	PhidgetVoltageInputHandle ch;
 	PhidgetReturnCode res;
 	const char *errs;
@@ -16,7 +16,7 @@ PhidgetVoltageInputHandle* voltageInit() {
 		exit(1);
 	}
 
-	res = initChannel((PhidgetHandle)ch, 2);
+	res = initChannel((PhidgetHandle)ch, channel);
 	if (res != EPHIDGET_OK) {
 		Phidget_getErrorDescription(res, &errs);
 		fprintf(stderr, "failed to initialize channel:%s\n", errs);

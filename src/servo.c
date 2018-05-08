@@ -18,7 +18,7 @@ static void onTargetPositionReachedHandler(PhidgetRCServoHandle ch, void *ctx, d
 }
 
 //void servoInit(PhidgetRCServoHandle* servohandle) {
-PhidgetRCServoHandle* servoInit() {
+PhidgetRCServoHandle* servoInit(int channel) {
 	PhidgetRCServoHandle ch;
 	PhidgetReturnCode res;
 	const char *errs;
@@ -28,7 +28,7 @@ PhidgetRCServoHandle* servoInit() {
 		exit(1);
 	}
 
-	res = initChannel((PhidgetHandle)ch, 0);
+	res = initChannel((PhidgetHandle)ch, channel);
 	if (res != EPHIDGET_OK) {
 		Phidget_getErrorDescription(res, &errs);
 		fprintf(stderr, "failed to initialize channel:%s\n", errs);

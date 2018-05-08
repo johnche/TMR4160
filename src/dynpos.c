@@ -7,7 +7,6 @@
 #include "servo.h"
 #include "voltage_input.h"
 #include "glplot.h"
-#include "ncc.c"
 #ifndef _WIN32
 #include <unistd.h>
 #else
@@ -116,34 +115,47 @@ void test_motor(PhidgetRCServoHandle* ch) {
 }
 
 int main(int argc, char** argv) {
-    //if (argc !=  6) {
-    //    printf("Error: expecting 6 args, got %d\n", argc);
-    //    printf("Hint: ./dynpos Kp Ti Td reference dt\n");
-    //    printf("Exiting..\n");
-    //    exit(1);
-    //}
-    //double Kp = atof(argv[1]);
-    //double Ki = atof(argv[2]);
-    //double Kd = atof(argv[3]);
-    //double reference = atof(argv[4]);
-    //double dt = atoi(argv[5]);
-    //printf("Kp: %lf, Ki: %lf, Kd: %lf, reference: %lf, dt: %d\n", Kp, Ki, Kd, reference, dt);
+ //   if (argc !=  6) {
+ //       printf("Error: expecting 6 args, got %d\n", argc);
+ //       printf("Hint: ./dynpos Kp Ti Td reference dt\n");
+ //       printf("Exiting..\n");
+ //       exit(1);
+ //   }
+ //   double Kp = atof(argv[1]);
+ //   double Ki = atof(argv[2]);
+ //   double Kd = atof(argv[3]);
+ //   double reference = atof(argv[4]);
+ //   double dt = atoi(argv[5]);
+ //   printf("Kp: %lf, Ki: %lf, Kd: %lf, reference: %lf, dt: %d\n", Kp, Ki, Kd, reference, dt);
 
     openGLinit(&argc, argv);
+
+//    PhidgetLog_enable(PHIDGET_LOG_INFO, NULL);
+//    struct DPContext context;
+//    context.vch = *voltageInit(0);
+//    context.ch = *servoInit(0);
+//    startServo(&context.ch);
+//    //test_motor(&context.ch);
+//    PID_controller(Kp, Ki, Kd, dt, reference, context);
+
+
     double counter = 0;
+    double step = 0.01;
     while (true) {
         rng();
-        //addPIDPoint(counter);
-        //counter++;
-        //usleep(100000);
+        usleep(10000);
+
+        setBoatPosition(counter, 0.0, 5.0);
+        counter += step;
+        if (counter > 5) {
+            counter = 5;
+            step *= -1;
+        } else if (counter < 0) {
+            counter = 0;
+            step *= -1;
+        }
     }
 
-    //PhidgetLog_enable(PHIDGET_LOG_INFO, NULL);
-    //struct DPContext context;
-    //context.vch = *voltageInit();
-    //context.ch = *servoInit();
-    //startServo(&context.ch);
-    ////test_motor(&context.ch);
-    //PID_controller(Kp, Ki, Kd, dt, reference, context);
+
 }
 
