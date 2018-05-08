@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <pthread.h>
+#include <string.h>
 #include "linked_list.h"
 #include "glplot.h"
 
@@ -168,7 +169,21 @@ void drawLayout() {
     glVertex3f(x_left, kd_r, 0);
     glVertex3f(x_left + g_width, kd_r, 0);
     glEnd();
-    //glRectf(0.5, 5, 15, 7);
+}
+
+void renderText(char s[], double x, double y) {
+    glRasterPos2i(x, y);
+    for (int i = 0; i < strlen(s); i++) {
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, s[i]);
+    }
+}
+
+void setText() {
+    glColor3f(0.0, 0.0, 0.0);
+    renderText("PID", x_left + g_width + 1, (2*sum_bottom + g_height)/2);
+    renderText("P", x_left + g_width + 1, (2*kp_bottom + g_height)/2);
+    renderText("I", x_left + g_width + 1, (2*ki_bottom + g_height)/2);
+    renderText("D", x_left + g_width + 1, (2*kd_bottom + g_height)/2);
 }
 
 void drawAxis() {
@@ -202,16 +217,17 @@ void specialKeyPressed(unsigned char key, int x, int y) {
 }
 
 void display() {
-    //glClearColor(0.8f, 0.8f, 0.6f, 1.f);
     glClearColor(124/255.0f, 111/255.0f, 100/255.0f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT);
     glLoadIdentity();
     glTranslatef(-9.23f, -5.75f, -10.0f);
 
-    drawLayout();
+    // Draw actors
     drawAxis();
+    drawLayout();
+    setText();
     renderLLData();
-    //drawGraph();
+    drawBoat();
 
     glutSwapBuffers();
 }
