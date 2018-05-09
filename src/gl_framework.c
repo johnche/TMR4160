@@ -7,28 +7,9 @@
 #include "linked_list.h"
 #include "gl_framework.h"
 
-#define foreach(item, array) \
-    for(int keep = 1, \
-            count = 0,\
-            size = sizeof (array) / sizeof *(array); \
-        keep && count != size; \
-        keep = !keep, count++) \
-      for(item = (array) + count; keep; keep = !keep)
-
-#define len(array) (sizeof(array) / sizeof(array[0]))
-
-double fRand(double f_min, double f_max) {
-    double f = (double) rand() / RAND_MAX;
-    return f*(f_max - f_min);
-}
-
-double scaleValue(double scale_min, double scale_max, double value_max, double value) {
-    double percentage = value / value_max;
-    return percentage*(scale_max - scale_min);
-}
 
 void renderText(char s[], double x, double y) {
-    glRasterPos2i(x, y);
+    glRasterPos2d(x, y);
     for (int i = 0; i < strlen(s); i++) {
         glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, s[i]);
     }

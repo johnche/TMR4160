@@ -3,18 +3,15 @@
 #include "phidget_tools.h"
 
 static void onPositionChangeHandler(PhidgetRCServoHandle ch, void *ctx, double position) {
-
-	printf("Position Changed: %.3g\n", position);
+	//printf("Position Changed: %.3g\n", position);
 }
 
 static void onVelocityChangeHandler(PhidgetRCServoHandle ch, void *ctx, double velocity) {
-
-	printf("Velocity Changed: %.3g\n", velocity);
+	//printf("Velocity Changed: %.3g\n", velocity);
 }
 
 static void onTargetPositionReachedHandler(PhidgetRCServoHandle ch, void *ctx, double position) {
-
-	printf("Target Position Reached: %.3g\n", position);
+	//printf("Target Position Reached: %.3g\n", position);
 }
 
 //void servoInit(PhidgetRCServoHandle* servohandle) {

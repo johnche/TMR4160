@@ -7,14 +7,12 @@
 #include "servo.h"
 #include "voltage_input.h"
 #include "pid_visuals.h"
-//#include "glplot.h"
-//#include "controllers.h"
+#include "controllers.h"
 #ifndef _WIN32
 #include <unistd.h>
 #else
 #include <Windows.h>
 #endif
-
 struct DPContext {
     PhidgetVoltageInputHandle vch;
     PhidgetRCServoHandle ch;
@@ -24,29 +22,6 @@ struct MotorSettings {
     double motor_max;
     double motor_min;
 };
-
-double sampler(double start_value, double constant,
-        int pid_frequency, int dt, PhidgetVoltageInputHandle* vch) {
-
-    double new_value; double old_value; double res;
-    double test1; double test2;
-    for (int i = 0; i < pid_frequency; i++) {
-        old_value = start_value;
-        PhidgetVoltageInput_getSensorValue(*vch, &new_value);
-        setBoatPosition(new_value, 3.55, 5);
-        //new_value = old_value*constant + new_value*(1 - constant);
-        //res = old_value*constant + new_value*(1 - constant);
-        test1 = old_value*constant;
-        test2 = new_value*(1-constant);
-        res = test1 + test2;
-        //printf("test1 %lf test2 %lf\n", test1, test2);
-        //printf("polled %lf  smoothed(res) %lf\n", new_value, res);
-        new_value = res;
-        usleep(1000*dt);
-    }
-
-    return new_value;
-}
 
 double scaleOutput(double value, struct MotorSettings settings) {
     if (value > 100) {
@@ -58,58 +33,30 @@ double scaleOutput(double value, struct MotorSettings settings) {
     }
 }
 
-void PID_controller(double Kp, double Ki, double Kd, double dt,
-        double reference, struct DPContext context) {
-    double i_prev = 0;
-    double error;
-    double error_prev;
-    double up;
-    double ui;
-    double ud;
-    double output;
+struct MotorSettings motor_settings;
 
-    double boat_position;
-    PhidgetVoltageInput_getSensorValue(&context.vch, &boat_position);
-
-    struct MotorSettings motor_settings;
-    motor_settings.motor_min = 82.0;
-    motor_settings.motor_max = 140.0;
-
-    while (true) {
-        boat_position = sampler(boat_position, 0.85, 20, dt, &context.vch);
-        //printf("PID %lf\n", boat_position);
-        error = reference - boat_position;
-        up = error;
-        ui = i_prev + Ki*dt*error;
-        ud = Kd*(error - error_prev)/dt;
-
-        error_prev = error;
-        i_prev = ui;
-
-        printf("%lf %lf %lf %lf\n", up, ui, ud, Kp);
-        addPIDNode(up, ui, ud);
-        output = scaleOutput(Kp*(up + ui + ud)*-1, motor_settings);
-        //printf("output: %lf, position: %lf\n", output, boat_position);
-        PhidgetRCServo_setTargetPosition(context.ch, output);
-    }
+void setMotorOutput(struct DPContext ctx, double output) {
+    double scaled_output = scaleOutput(-output, motor_settings);
+    //printf("OUTPUT: %f\n", scaled_output);
+    PhidgetRCServo_setTargetPosition(ctx.ch, scaled_output);
 }
 
-//void setMotorOutput(struct DPContext ctx, double output) {
-//    double scaled_output = scaleOutput(output, motor_settings);
-//    PhidgetRCServo_setTargetPosition(ctx.ch, scaled_output);
-//}
-//double reference;
-//void motorController(double Kp, double Ki, double Kd, double dt, struct DPContext ctx) {
-//    double boat_position;
-//    double output;
-//    PhidgetVoltageInput_getSensorValue(&ctx.vch, &boat_position);
-//
-//    while (true) {
-//        boat_position = sampler(boat_position, 0.85, 20, dt, &ctx.vch);
-//        output = calculatePIDOutput(Kp, Ki, Kd, reference - boat_position, dt);
-//        setMotorOutput(ctx, output);
-//    }
-//}
+double reference;
+void motorController(double Kp, double Ki, double Kd, double dt, struct DPContext ctx) {
+    double boat_position;
+    double output;
+    PhidgetVoltageInput_getSensorValue(&ctx.vch, &boat_position);
+
+    while (true) {
+        //boat_position = sampler(boat_position, 0.85, 20, dt, &ctx.vch);
+        PhidgetVoltageInput_getSensorValue(ctx.vch, &boat_position);
+        setBoatPosition(boat_position, 3.55, 5.0);
+        //printf("position: %f, error: %f (%f)\n", boat_position, reference - boat_position, reference);
+        //printf("ref %f pos %f error %f\n", reference, boat_position, reference - boat_position);
+        output = calculatePIDOutput(Kp, Ki, Kd, reference - boat_position, dt);
+        setMotorOutput(ctx, output);
+    }
+}
 
 void test_motor(PhidgetRCServoHandle* ch) {
     double test_input;
@@ -120,21 +67,24 @@ void test_motor(PhidgetRCServoHandle* ch) {
 }
 
 int main(int argc, char** argv) {
- //   if (argc !=  6) {
- //       printf("Error: expecting 6 args, got %d\n", argc);
- //       printf("Hint: ./dynpos Kp Ti Td reference dt\n");
- //       printf("Exiting..\n");
- //       exit(1);
- //   }
- //   double Kp = atof(argv[1]);
- //   double Ki = atof(argv[2]);
- //   double Kd = atof(argv[3]);
- //   double reference = atof(argv[4]);
- //   double dt = atoi(argv[5]);
- //   printf("Kp: %lf, Ki: %lf, Kd: %lf, reference: %lf, dt: %d\n", Kp, Ki, Kd, reference, dt);
+//    if (argc !=  6) {
+//        printf("Error: expecting 6 args, got %d\n", argc);
+//        printf("Hint: ./dynpos Kp Ti Td reference dt\n");
+//        printf("Exiting..\n");
+//        exit(1);
+//    }
+//    double Kp = atof(argv[1]);
+//    double Ki = atof(argv[2]);
+//    double Kd = atof(argv[3]);
+//    //double reference = atof(argv[4]);
+//    reference = atof(argv[4]);
+//    double dt = atoi(argv[5]);
+//    printf("Kp: %lf, Ki: %lf, Kd: %lf, reference: %lf, dt: %d\n", Kp, Ki, Kd, reference, dt);
+//
+//    motor_settings.motor_min = 72.0;
+//    motor_settings.motor_max = 152.0;
 
-    printf("start\n");
-    graphInit(&argc, argv);
+    graphInit(&argc, argv, NULL);
 
 //    PhidgetLog_enable(PHIDGET_LOG_INFO, NULL);
 //    struct DPContext context;
@@ -142,14 +92,17 @@ int main(int argc, char** argv) {
 //    context.ch = *servoInit(0);
 //    startServo(&context.ch);
 //    //test_motor(&context.ch);
-//    PID_controller(Kp, Ki, Kd, dt, reference, context);
+//    //PID_controller(Kp, Ki, Kd, dt, reference, context);
+//    motorController(Kp, Ki, Kd, dt, context);
 
 
+
+//================= TESTING====================
     double counter = 0;
     double step = 0.01;
     while (true) {
         rng();
-        usleep(10000);
+        usleep(100000);
 
         setBoatPosition(counter, 0.0, 5.0);
         counter += step;
