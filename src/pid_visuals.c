@@ -26,13 +26,20 @@ char* ud_value[];
 double up_r;
 double ui_r;
 double ud_r;
+double sum_r;
 double sum_max;
 double up_max;
 double ui_max;
 double ud_max;
-double sum_r;
+double boat_max;
+double boat_min;
 double boat_position;
+double reference;
+double boat_rect_left;
+double ref_rect_left;
+char* ref_position_text[];
 char* boat_position_text[];
+char* err_position_text[];
 LinkedList* up_data;
 LinkedList* ui_data;
 LinkedList* ud_data;
@@ -50,6 +57,14 @@ double scaleValue(double scale_min, double scale_max, double value_max, double v
 char* doubleToCharArray(double d, char* res) {
     snprintf(res, sizeof(res), "%4.7f", d);
     return res;
+}
+
+void updateBoatPosition(double position) {
+    boat_position = position;
+}
+
+void updateReference(double new_reference) {
+    reference = new_reference;
 }
 
 void drawLine(double x1, double y1, double x2, double y2, double axis) {
@@ -143,13 +158,22 @@ void addPIDNode(double up, double ui, double ud) {
     addLLNode(ud_data, ud);
 }
 
-void setBoatPosition(double position, double min_val, double max_val) {
-    boat_position = x_left + scaleValue(0, g_width, max_val - min_val, position - min_val);
-}
-
 void drawBoat() {
     glColor3f(0, 0, 0);
-    glRectf(boat_position - 0.05, boatline - 0.5, boat_position + 0.05, boatline + boatline_thickness + 0.4);
+    boat_rect_left = x_left + scaleValue(0, g_width, boat_max - boat_min, boat_position - boat_min);
+    glRectf(boat_rect_left - 0.05,
+            boatline - 0.5,
+            boat_rect_left + 0.05,
+            boatline + boatline_thickness + 0.4);
+}
+
+void drawReference() {
+    glColor4ub(200, 0, 0, 255);
+    ref_rect_left = x_left + scaleValue(0, g_width, boat_max - boat_min, reference - boat_min);
+    glRectf(ref_rect_left - 0.05,
+            boatline - 0.5,
+            ref_rect_left + 0.05,
+            boatline + boatline_thickness + 0.4);
 }
 
 void drawLayout() {
@@ -198,8 +222,12 @@ void setText() {
     renderText("D", x_right + 0.5, ud_r + value_offset);
     if (up_data->tail != NULL && ui_data->tail != NULL && ud_data->tail != NULL) {
         //TODO: boat position, reference and error
+        doubleToCharArray(reference, ref_position_text);
+        renderText(ref_position_text, x_right + 1.5, boatline + 0.5);
         doubleToCharArray(boat_position, boat_position_text);
         renderText(boat_position_text, x_right + 1.5, boatline);
+        doubleToCharArray(reference - boat_position, err_position_text);
+        renderText(err_position_text, x_right + 1.5, boatline - 0.5);
 
         doubleToCharArray(up_data->tail->data +
                 ui_data->tail->data +
@@ -218,20 +246,19 @@ void setText() {
     }
 }
 
-void drawAxis() {
-    glBegin(GL_LINES);
-    // x-axis
-    glLineWidth(1.0);
-    glColor3f(1.0f, 0.0f, 0.0f);
-    glVertex3f(0.0f, 0.0f, 0.0f);   glVertex3f(10.0f, 0.0f, 0.0f);
-    // y-axis
-    glLineWidth(1.0);
-    glColor3f(1.0f, 0.0f, 0.0f);
-    glVertex3f(0.0f, 0.0f, 0.0f);   glVertex3f(0.0f, 10.0f, 0.0f);
-    glEnd();
+void drawActors() {
+    setText();
+    renderLLData();
+    drawBoat();
+    drawReference();
 }
 
-void graphInit(int* argc, char** argv, char* log_path) {
+void graphInit(int* argc,
+        char** argv,
+        double b_max,
+        double b_min,
+        void (*specialKeyPressed)(unsigned char, int, int),
+        char* log_path) {
 //    FILE* f = openFile("logs/log1.txt", "r");
 //    char line[128];
 //    while(nextLine(f, line)) {
@@ -247,6 +274,8 @@ void graphInit(int* argc, char** argv, char* log_path) {
     up_data = newLinkedList();
     ui_data = newLinkedList();
     ud_data = newLinkedList();
+    boat_max = b_max;
+    boat_min = b_min;
     up_r = up_bottom + 0.5*g_height;
     ui_r = ui_bottom + 0.5*g_height;
     ud_r = ud_bottom + 0.5*g_height;
@@ -269,10 +298,11 @@ void graphInit(int* argc, char** argv, char* log_path) {
         ui_max = atof(argv[2])*i_scale;
         ud_max = atof(argv[3])*d_scale;
         sum_max = up_max;
+        reference = atof(argv[4]);
         // log this
         printf("p_scale %f, i_scale %f, d_scale %f\n", p_scale, i_scale, d_scale);
     }
 
-    openGLinit(argc, argv);
+    openGLinit(argc, argv, specialKeyPressed);
 }
 

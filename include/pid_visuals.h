@@ -2,5 +2,11 @@
 
 void rng();
 void addPIDNode(double up, double ui, double ud);
-void setBoatPosition(double position, double min_val, double max_val);
-void graphInit(int* argc, char** argv, char* log_path);
+void updateBoatPosition(double position);
+void updateReference(double new_reference);
+void graphInit(int* argc,
+        char** argv,
+        double b_max,
+        double b_min,
+        void (*specialKeyPressed)(unsigned char, int, int),
+        char* log_path);

@@ -25,8 +25,6 @@ double calculatePIDOutput(double Kp, double Ki, double Kd, double error, double 
     double ui = IController(Ki, error, dt, i_prev, 500);
     double ud = DController(Kd, error, dt, error_prev);
 
-    printf("up %f ui %f ud %f\n", up, ui, ud);
-
     addPIDNode(up, ui, ud);
     error_prev = error;
     i_prev = ui;

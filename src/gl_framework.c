@@ -25,25 +25,14 @@ void keyPressed(unsigned char key, int x, int y) {
     }
 }
 
-void specialKeyPressed(unsigned char key, int x, int y) {
-    printf("specialkey %d\n", key);
-    switch(key) {
-        break;
-    }
-}
-
 void display() {
     glClearColor(124/255.0f, 111/255.0f, 100/255.0f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT);
     glLoadIdentity();
     glTranslatef(-9.23f, -5.75f, -10.0f);
 
-    // Draw actors
-    drawAxis();
     drawLayout();
-    setText();
-    renderLLData();
-    drawBoat();
+    drawActors();
 
     glutSwapBuffers();
 }
@@ -57,7 +46,7 @@ void reshape(int width, int height) {
 }
 
 
-int openGLinit(int* argc, char** argv) {
+int openGLinit(int* argc, char** argv, void (*specialKeyPressed)(unsigned char, int, int)) {
     int SCREEN_WIDTH = 1280;
     int SCREEN_HEIGHT = 800;
     glutInit(argc, argv);

@@ -13,6 +13,7 @@
 #else
 #include <Windows.h>
 #endif
+
 struct DPContext {
     PhidgetVoltageInputHandle vch;
     PhidgetRCServoHandle ch;
@@ -22,6 +23,29 @@ struct MotorSettings {
     double motor_max;
     double motor_min;
 };
+
+double reference;
+double b_min = 3.55;
+double b_max = 5.0;
+double r_step = 0.1;
+
+void specialKeyPressed(unsigned char key, int x, int y) {
+    printf("specialkey %d\n", key);
+    switch (key) {
+        case 100:
+            reference -= r_step;
+            if (reference < b_min)
+                reference = b_min;
+            updateReference(reference);
+            break;
+        case 102:
+            reference += r_step;
+            if (reference > b_max)
+                reference = b_max;
+            updateReference(reference);
+            break;
+    }
+}
 
 double scaleOutput(double value, struct MotorSettings settings) {
     if (value > 100) {
@@ -41,7 +65,6 @@ void setMotorOutput(struct DPContext ctx, double output) {
     PhidgetRCServo_setTargetPosition(ctx.ch, scaled_output);
 }
 
-double reference;
 void motorController(double Kp, double Ki, double Kd, double dt, struct DPContext ctx) {
     double boat_position;
     double output;
@@ -50,7 +73,7 @@ void motorController(double Kp, double Ki, double Kd, double dt, struct DPContex
     while (true) {
         //boat_position = sampler(boat_position, 0.85, 20, dt, &ctx.vch);
         PhidgetVoltageInput_getSensorValue(ctx.vch, &boat_position);
-        setBoatPosition(boat_position, 3.55, 5.0);
+        updateBoatPosition(boat_position);
         //printf("position: %f, error: %f (%f)\n", boat_position, reference - boat_position, reference);
         //printf("ref %f pos %f error %f\n", reference, boat_position, reference - boat_position);
         output = calculatePIDOutput(Kp, Ki, Kd, reference - boat_position, dt);
@@ -76,35 +99,34 @@ int main(int argc, char** argv) {
 //    double Kp = atof(argv[1]);
 //    double Ki = atof(argv[2]);
 //    double Kd = atof(argv[3]);
-//    //double reference = atof(argv[4]);
 //    reference = atof(argv[4]);
 //    double dt = atoi(argv[5]);
 //    printf("Kp: %lf, Ki: %lf, Kd: %lf, reference: %lf, dt: %d\n", Kp, Ki, Kd, reference, dt);
 //
 //    motor_settings.motor_min = 72.0;
 //    motor_settings.motor_max = 152.0;
-
-    graphInit(&argc, argv, NULL);
-
+//
+//    graphInit(&argc, argv, b_max, b_min, specialKeyPressed, NULL);
+//
 //    PhidgetLog_enable(PHIDGET_LOG_INFO, NULL);
 //    struct DPContext context;
 //    context.vch = *voltageInit(0);
 //    context.ch = *servoInit(0);
 //    startServo(&context.ch);
-//    //test_motor(&context.ch);
-//    //PID_controller(Kp, Ki, Kd, dt, reference, context);
+////    //test_motor(&context.ch);
+////    //PID_controller(Kp, Ki, Kd, dt, reference, context);
 //    motorController(Kp, Ki, Kd, dt, context);
 
 
-
 //================= TESTING====================
+    graphInit(&argc, argv, 5.0, 0, specialKeyPressed, NULL);
     double counter = 0;
     double step = 0.01;
     while (true) {
         rng();
         usleep(100000);
 
-        setBoatPosition(counter, 0.0, 5.0);
+        updateBoatPosition(counter);
         counter += step;
         if (counter > 5) {
             counter = 5;
