@@ -162,7 +162,7 @@ void test_motor(PhidgetRCServoHandle* ch) {
  */
 int main(int argc, char** argv) {
     if (argc == 2)
-        graphInit(&argc, argv, b_max, b_min, keyPressed, specialKeyPressed, argv[1]);
+        graphInit(&argc, argv, 5.0, 3.55, keyPressed, specialKeyPressed, argv[1]);
     else if (argc !=  6) {
         printf("Error. Please input arguments\n");
         printf("Standard mode: ./dynpos Kp Ti Td reference dt\n");
