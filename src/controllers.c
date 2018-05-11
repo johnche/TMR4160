@@ -31,12 +31,3 @@ double calculatePIDOutput(double Kp, double Ki, double Kd, double error, double 
     return up + ui + ud;
 }
 
-//double PID_withPrev(double error0, double error1, double error2,
-//        double Kp, double Ti, double Td, double dt, double uprev) {
-//    double up = error0 - error1;
-//    double ui = (error0 * dt)/Ti;
-//    double ud = (Td/dt)*(error0 - 2*error1 + error2);
-//    return Kp*(up + ui + ud) + uprev;
-//}
-
-

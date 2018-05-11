@@ -15,16 +15,6 @@ void renderText(char s[], double x, double y) {
     }
 }
 
-void keyPressed(unsigned char key, int x, int y) {
-    printf("key %d\n", key);
-    switch (key) {
-        case 27:
-            printf("Exiting..");
-            exit(0);
-            break;
-    }
-}
-
 void display() {
     glClearColor(124/255.0f, 111/255.0f, 100/255.0f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -46,7 +36,10 @@ void reshape(int width, int height) {
 }
 
 
-int openGLinit(int* argc, char** argv, void (*specialKeyPressed)(unsigned char, int, int)) {
+int openGLinit(int* argc,
+        char** argv,
+        void (*keyPressed)(unsigned char, int, int),
+        void (*specialKeyPressed)(unsigned char, int, int)) {
     int SCREEN_WIDTH = 1280;
     int SCREEN_HEIGHT = 800;
     glutInit(argc, argv);
