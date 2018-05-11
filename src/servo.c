@@ -2,6 +2,10 @@
 #include "phidget22.h"
 #include "phidget_tools.h"
 
+/*
+ * Logic containing initializers for servo communication
+ */
+
 static void onPositionChangeHandler(PhidgetRCServoHandle ch, void *ctx, double position) {
 	//printf("Position Changed: %.3g\n", position);
 }
@@ -14,7 +18,10 @@ static void onTargetPositionReachedHandler(PhidgetRCServoHandle ch, void *ctx, d
 	//printf("Target Position Reached: %.3g\n", position);
 }
 
-//void servoInit(PhidgetRCServoHandle* servohandle) {
+/*
+ * Returns a phidget handler which can be used other places to communicate
+ * with the phidget devices.
+ */
 PhidgetRCServoHandle* servoInit(int channel) {
 	PhidgetRCServoHandle ch;
 	PhidgetReturnCode res;
@@ -80,6 +87,9 @@ PhidgetRCServoHandle* servoInit(int channel) {
     return &ch;
 }
 
+/*
+ * The phidget framework requires a target position before setEngaged can be called.
+ */
 void startServo(PhidgetRCServoHandle* ch) {
     PhidgetReturnCode res;
 	printf("Setting target position to 90\n");

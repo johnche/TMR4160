@@ -2,10 +2,18 @@
 #include "phidget22.h"
 #include "phidget_tools.h"
 
+/*
+ * Initializer for voltage input.
+ */
+
 static void onVoltageChangeHandler(PhidgetVoltageInputHandle ch, void *ctx, double voltage) {
 	//printf("Voltage Changed: %.4f\n", voltage);
 }
 
+/*
+ * Returns a phidget handler which can be used other places to communicate
+ * with the phidget devices.
+ */
 PhidgetVoltageInputHandle* voltageInit(int channel) {
 	PhidgetVoltageInputHandle ch;
 	PhidgetReturnCode res;

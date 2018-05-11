@@ -1,6 +1,11 @@
 #include "phidget_tools.h"
 #include <stdio.h>
 
+/*
+ * Phidget framework boilerplate.
+ * Verbose checks while initializing.
+ */
+
 static void onAttachHandler(PhidgetHandle phid, void *ctx) {
 	PhidgetReturnCode res;
 	int hubPort;

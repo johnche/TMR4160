@@ -3,50 +3,46 @@
 #include <stdbool.h>
 #include "log_io.h"
 
-//FILE *f = fopen("file.txt", "w");
-//if (f == NULL)
-//{
-//    printf("Error opening file!\n");
-//    exit(1);
-//}
-//
-///* print some text */
-//const char *text = "Write this to the file";
-//fprintf(f, "Some text: %s\n", text);
-//
-///* print integers and floats */
-//int i = 1;
-//float py = 3.1415927;
-//fprintf(f, "Integer: %d, float: %f\n", i, py);
-//
-///* printing single chatacters */
-//char c = 'A';
-//fprintf(f, "A character: %c\n", c);
-//
-//fclose(f);
+/*
+ * Backend for all IO operations.
+ * These are used for logging controller states and parameters,
+ * but also reading the same logs.
+ */
 
-void writeHeaders() {
-}
-
+/*
+ * Writes the first line in a log which should contain initializer
+ * parameters such as samplerate, gain constants and graph scaling.
+ */
 void writeHeaderValues(FILE* fp,
         double kp, double ki, double kd, int dt,
         double pscale, double iscale, double dscale){
     fprintf(fp, "%f %f %f %d %f %f %f\n", kp, ki, kd, dt, pscale, iscale, dscale);
 }
 
+/*
+ * Writes the state of the control system
+ */
 void writePIDValues(FILE* fp, double up, double ui, double ud, double pos, double ref) {
     fprintf(fp, "%f %f %f %f %f\n", up, ui, ud, pos, ref);
 }
 
-bool hasNext(FILE* fp) {
-    return feof(fp) == 0;
-}
-
+/*
+ * Returns next line found in the file from fp.
+ * Returns NULL if there is no next line.
+ */
 char* nextLine(FILE* fp, char* buffer[], int bufferlen) {
     fgets(buffer, bufferlen, fp);
     return buffer;
 }
 
+/*
+ * Opens a filepointer.
+ * If a path is provided, it will open up the file with read access
+ * at this path.
+ * Otherwise, it will create a new file which it will have write
+ * access to. This file will be named
+ * "pidlog_[year month day hour min sec].txt".
+ */
 FILE* openFile(char file_name[], char* mode) {
     FILE* f;
     if (file_name)
@@ -67,6 +63,10 @@ FILE* openFile(char file_name[], char* mode) {
     return f;
 }
 
+/*
+ * Closes file (important!)
+ * Not closing can possibly corrupt file.
+ */
 void closeFile(FILE* fp) {
     fclose(fp);
     printf("Logfile closed\n");

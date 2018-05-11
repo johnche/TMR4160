@@ -1,7 +1,6 @@
 #pragma once
 #include <stdio.h>
 
-void rng();
 void addPIDNode(double up, double ui, double ud);
 void updateBoatPosition(double position);
 void updateReference(double new_reference);
