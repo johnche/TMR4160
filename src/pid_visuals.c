@@ -121,8 +121,8 @@ void renderLLData() {
             current[1]->next != NULL &&
             current[2]->next != NULL &&
             current[3]->next != NULL) {
-        last_x = x_left + counter-step + 0.1;
-        current_x = x_left + counter + 0.1;
+        last_x = x_left + counter-step;
+        current_x = x_left + counter;
 
         // position graph
         glColor3ub(71, 144, 48);
