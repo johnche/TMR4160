@@ -24,7 +24,7 @@ void renderText(char s[], double x, double y) {
 
 void display() {
     // Background color
-    glClearColor(124/255.0f, 111/255.0f, 100/255.0f, 1.f);
+    glClearColor(40/255.0f, 40/255.0f, 40/255.0f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT);
     glLoadIdentity();
 

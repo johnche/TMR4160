@@ -139,7 +139,7 @@ void renderLLData() {
     double counter = 0.0;
     double last_x; double current_x;
     glBegin(GL_LINES);
-    glLineWidth(1.0);
+    glLineWidth(5.0);
     while (current[0]->next != NULL &&
             current[1]->next != NULL &&
             current[2]->next != NULL &&
@@ -164,7 +164,7 @@ void renderLLData() {
         current[3] = current[3]->next;
 
         // pid graph
-        glColor3ub(71, 144, 48);
+        glColor3ub(69, 133, 136);
         double pid_sum = current[0]->data + current[1]->data + current[2]->data;
         double next_pid_sum = current[0]->next->data +
             current[1]->next->data +
@@ -174,21 +174,21 @@ void renderLLData() {
                 sum_r);
 
         // up graph
-        glColor3ub(71, 144, 48);
+        glColor3ub(142, 192, 124);
         drawClampedLine(last_x, scaleValue(0, 0.5*g_height, up_max, current[0]->data),
                 current_x, scaleValue(0, 0.5*g_height, up_max, current[0]->next->data),
                 up_r);
         current[0] = current[0]->next;
 
         // ui graph
-        glColor3ub(37, 87, 107);
+        glColor3ub(250, 189, 47);
         drawClampedLine(last_x, scaleValue(0, 0.5*g_height, ui_max, current[1]->data),
                 current_x, scaleValue(0, 0.5*g_height, ui_max, current[1]->next->data),
                 ui_r);
         current[1] = current[1]->next;
 
         // ud graph
-        glColor3ub(162, 54, 69);
+        glColor3ub(251, 73, 52);
         drawClampedLine(last_x, scaleValue(0, 0.5*g_height, ud_max, current[2]->data),
                 current_x, scaleValue(0, 0.5*g_height, ud_max, current[2]->next->data),
                 ud_r);
@@ -286,7 +286,7 @@ void setValuesText() {
 void drawLayout() {
     // Boat position rectangle
     if (show_pos_graph) {
-        glColor3ub(251, 241, 199);
+        glColor3ub(235, 235, 235);
         glRectf(x_left, boat_bottom, x_right, boat_bottom + boat_height);
     }
     else {
@@ -295,7 +295,7 @@ void drawLayout() {
     }
 
     // Rectangles for the four graphs
-    glColor3ub(251, 241, 199);
+    glColor3ub(235, 235, 235);
     glRectf(x_left, sum_bottom, x_right, sum_bottom + g_height);
     glRectf(x_left, up_bottom, x_right, up_bottom + g_height);
     glRectf(x_left, ui_bottom, x_right, ui_bottom + g_height);
@@ -327,7 +327,7 @@ void drawLayout() {
     renderText("pos", x_right + 0.5, boatline);
     glColor3f(1.0, 0.0, 0.0);
     renderText("err", x_right + 0.5, boatline - 0.5);
-    glColor3f(0.0, 0.0, 0.0);
+    glColor3ub(146, 131, 116);
     renderText("PID", x_right + 0.5, sum_r + value_offset);
     renderText("P", x_right + 0.5, up_r + value_offset);
     renderText("I", x_right + 0.5, ui_r + value_offset);
