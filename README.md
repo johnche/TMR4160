@@ -1,7 +1,7 @@
 Dynamic Positioning (TMR4160)
 =============================
 
-This project is tested on GNU/Linux distributions. May not run on other..
+This project is tested on Linux distributions. May not run on other..
 
 Dependencies
 -------------
